@@ -12,7 +12,9 @@ function App() {
     try {
       const res = await fetch("http://127.0.0.1:5000/scan/", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ code }),
       });
 
@@ -39,28 +41,20 @@ function App() {
         background: "linear-gradient(135deg, #0f172a, #020617)",
         display: "flex",
         justifyContent: "center",
-        alignItems: "flex-start",
         paddingTop: "60px",
         color: "white",
         fontFamily: "Inter, sans-serif",
       }}
     >
-      {/* CENTER CONTAINER */}
-      <div
-        style={{
-          width: "100%",
-          maxWidth: "800px",
-          padding: "20px",
-        }}
-      >
+      <div style={{ width: "100%", maxWidth: "900px", padding: "20px" }}>
+        
         {/* TITLE */}
         <motion.h1
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
-            fontSize: "28px",
-            marginBottom: "25px",
             textAlign: "center",
+            marginBottom: "25px",
             background: "linear-gradient(90deg,#22c55e,#06b6d4)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
@@ -70,9 +64,7 @@ function App() {
         </motion.h1>
 
         {/* TEXTAREA */}
-        <motion.textarea
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        <textarea
           rows="10"
           placeholder="Paste your code here..."
           value={code}
@@ -81,10 +73,10 @@ function App() {
             width: "100%",
             padding: "14px",
             borderRadius: "10px",
-            border: "1px solid rgba(255,255,255,0.08)",
-            background: "rgba(255,255,255,0.04)",
+            background: "#020617",
             color: "white",
-            fontSize: "14px",
+            border: "1px solid #1e293b",
+            fontFamily: "monospace",
           }}
         />
 
@@ -94,7 +86,6 @@ function App() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleScan}
-            disabled={loading}
             style={{
               marginTop: "20px",
               padding: "10px 26px",
@@ -102,7 +93,6 @@ function App() {
               border: "none",
               background: "linear-gradient(90deg,#22c55e,#06b6d4)",
               color: "white",
-              fontWeight: "500",
               cursor: "pointer",
             }}
           >
@@ -120,48 +110,75 @@ function App() {
             {/* SUMMARY */}
             <div style={{ textAlign: "center", marginBottom: "20px" }}>
               <h3>
-                Risk:{" "}
-                <span style={{ color: "#ff4d4d" }}>
-                  {result.risk.level}
-                </span>
+                Risk: <span style={{ color: "#ff4d4d" }}>{result.risk.level}</span>
               </h3>
-              <p style={{ opacity: 0.7 }}>
-                Score: {result.risk.score}
-              </p>
+              <p>Score: {result.risk.score}</p>
+            </div>
+
+            {/* 🔥 CODE DISPLAY WITH HIGHLIGHT */}
+            <div
+              style={{
+                marginBottom: "25px",
+                background: "#020617",
+                padding: "15px",
+                borderRadius: "10px",
+                fontFamily: "monospace",
+                fontSize: "13px",
+              }}
+            >
+              {code.split("\n").map((line, index) => {
+                const lineNumber = index + 1;
+
+                const isIssue = result.issues.some(
+                  (issue) => issue.line === lineNumber
+                );
+
+                return (
+                  <div
+                    key={index}
+                    style={{
+                      background: isIssue ? "rgba(255,0,0,0.2)" : "transparent",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                    }}
+                  >
+                    <span style={{ opacity: 0.5 }}>
+                      {lineNumber}.
+                    </span>{" "}
+                    {line}
+                  </div>
+                );
+              })}
             </div>
 
             {/* ISSUE CARDS */}
             {result.issues.map((issue, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.08 }}
                 style={{
                   marginBottom: "12px",
-                  padding: "16px",
-                  borderRadius: "12px",
-                  background: "rgba(255,255,255,0.04)",
-                  border: "1px solid rgba(255,255,255,0.06)",
+                  padding: "14px",
+                  borderRadius: "10px",
+                  background: "#020617",
                   borderLeft: `4px solid ${getColor(issue.severity)}`,
                 }}
               >
-                <h4 style={{ marginBottom: "6px" }}>
-                  {issue.type}
-                </h4>
+                <h4>{issue.type}</h4>
 
-                <p style={{ fontSize: "13px", opacity: 0.8 }}>
-                  {issue.message}
+                <p>{issue.message}</p>
+
+                <p style={{ opacity: 0.6 }}>
+                  Line: {issue.line}
                 </p>
 
-                <p style={{ marginTop: "8px", fontSize: "13px" }}>
+                <p>
                   <b>AI:</b> {issue.ai_explanation}
                 </p>
 
-                <p style={{ fontSize: "13px" }}>
+                <p>
                   <b>Fix:</b> {issue.suggested_fix}
                 </p>
-              </motion.div>
+              </div>
             ))}
           </motion.div>
         )}
